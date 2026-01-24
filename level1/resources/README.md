@@ -94,7 +94,7 @@ Breakpoint 1, 0x08048480 in main ()
 
 We have found the address of the string `system()`: `0x08048360` and the address of `"/bin/sh"`: `0x0804a008`.
 
-Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the right amount is 76 bytes, which gives us the following payload:
+Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the right amount is 76 bytes, which gives us the following payload following the x86 architecture:
 
 > `'A' * 76 + 0x08048360 + fake_return_address + 0x0804a008
 
