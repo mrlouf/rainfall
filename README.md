@@ -10,6 +10,12 @@ Again, the project is structured as a series of levels, each focusing on a speci
 
 The ".pass" file is located at the home directory of each (level0 excluded) user.
 
+### Objective
+
+The main objective of this project is _not_ to simply get the flag for each level. This can be easily achieved with the help of IA or looking up walkthroughs.
+
+Instead, the real goal is to learn and practice **reverse engineering**, that is analysing unknown binaries to understand their functionality, flow, and being able to reconstruct the source code from the disassembly. Only after we get a solid understanding of the source code can we start thinking about possible vulnerabilities and exploitation techniques.
+
 ##  Setup
 
 To set up the environment for this project, you need to start a VM using the provided ISO file. The VM is pre-configured with all the necessary tools and dependencies required for the challenges, all you need to do is confiure the network settings to use a bridged adapter so you can access the VM from your host machine via ssh on port 4242:
@@ -74,3 +80,18 @@ No RELRO        No canary found   NX enabled    No PIE          No RPATH   No RU
 - **No PIE**: Position Independent Executable (PIE) is not enabled, meaning that the binary is loaded at a fixed address in memory. This, combined with ASLR being disabled, makes it much easier to predict the locations of functions and gadgets within the binary for exploitation.
 
 In summary, the security settings and binary characteristics indicate that while there are some protections in place (like NX), there are also significant weaknesses (like no RELRO, no canary, no PIE, and disabled ASLR) that can be exploited. This sets the stage for a buffer overflow exploit using ROP techniques to gain control of the program's execution flow.
+
+##  Useful commands and tools
+
+Our best allies in this project are mainly `readelf` and `gdb`. Here are some very useful ways to use them:
+- `readelf -a <binary>`: Displays detailed information about the ELF binary, including headers, sections, and segments.
+- `gdb -batch <binary> -ex "disas main"`: Disassembles the main function of the binary in a non-interactive way. Replace `main` with any function name to disassemble other functions.
+
+Useful gdb commands in interactive mode:
+- `break <function_name>`: Sets a breakpoint at the beginning of the specified function. Note: 'Break' can be abbreviated as 'b'.
+- `b *<address>`: Sets a breakpoint at the specified memory address in hexadecimal. Note: the asterisk (*) indicates that the address is an absolute address.
+- `run` or `r`: Starts the execution of the program until it hits a breakpoint or finishes.
+- `next` or `n`: Executes the next line of code, stepping over function calls.
+- `set $eip = <address>`: Sets the instruction pointer (EIP) to the specified address, allowing you 'cheat' the execution flow and jump to different parts of the code. Useful to skip certain checks or reach hidden functions for example, but may lead to segfaults or undefined behavior if not used carefully.
+- `info registers`: Displays the current values of all CPU registers, useful for understanding the program's state during execution and get the values of the registers.
+- `x/<format> <address>`: Examines memory at the specified address. The format can be adjusted to display data in different ways (e.g., `x/s` for string, `x/x` for hexadecimal).
