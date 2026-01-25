@@ -1,11 +1,12 @@
-void run()
+void run( void )
 {
-    fwrite();
-    system();
+    fwrite("Good... Wait what?\n", 1, 19, stdout);
+    system("/bin/sh");
     return;
 }
 
 int main( void )
 {
-    gets();
+    char buffer[80];
+    gets(buffer);
 }

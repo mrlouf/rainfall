@@ -60,7 +60,58 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 Segmentation fault (core dumped)
 ```
 
-##  How can we exploit this vulnerability?
+But that is not all: if we run readelf on the binary, we can actually see a ghost function in the program that is never called under the normal execution flow:
+
+```bash
+level1@RainFall:~$ readelf -a ./level1
+level1@RainFall:~$ readelf -a ./level1 | grep FUNC
+     1: 00000000     0 FUNC    GLOBAL DEFAULT  UND gets@GLIBC_2.0 (2)
+     2: 00000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.0 (2)
+     3: 00000000     0 FUNC    GLOBAL DEFAULT  UND system@GLIBC_2.0 (2)
+     5: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.0 (2)
+    31: 080483c0     0 FUNC    LOCAL  DEFAULT   13 __do_global_dtors_aux
+    34: 08048420     0 FUNC    LOCAL  DEFAULT   13 frame_dummy
+    39: 08048520     0 FUNC    LOCAL  DEFAULT   13 __do_global_ctors_aux
+    45: 08048510     2 FUNC    GLOBAL DEFAULT   13 __libc_csu_fini
+    46: 08048512     0 FUNC    GLOBAL HIDDEN    13 __i686.get_pc_thunk.bx
+    48: 00000000     0 FUNC    GLOBAL DEFAULT  UND gets@@GLIBC_2.0
+    50: 08048444    60 FUNC    GLOBAL DEFAULT   13 run
+    51: 0804854c     0 FUNC    GLOBAL DEFAULT   14 _fini
+    52: 00000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@@GLIBC_2.0
+    55: 00000000     0 FUNC    GLOBAL DEFAULT  UND system@@GLIBC_2.0
+    59: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
+    60: 080484a0    97 FUNC    GLOBAL DEFAULT   13 __libc_csu_init
+    62: 08048390     0 FUNC    GLOBAL DEFAULT   13 _start
+    66: 08048480    23 FUNC    GLOBAL DEFAULT   13 main
+    68: 080482f8     0 FUNC    GLOBAL DEFAULT   11 _init
+```
+
+And this is the corresponding disassembly:
+
+```bash
+level1@RainFall:~$ gdb -batch ./level1 -ex 'disas run'
+Dump of assembler code for function run:
+   0x08048444 <+0>:	push   %ebp
+   0x08048445 <+1>:	mov    %esp,%ebp
+   0x08048447 <+3>:	sub    $0x18,%esp
+   0x0804844a <+6>:	mov    0x80497c0,%eax
+   0x0804844f <+11>:	mov    %eax,%edx
+   0x08048451 <+13>:	mov    $0x8048570,%eax
+   0x08048456 <+18>:	mov    %edx,0xc(%esp)
+   0x0804845a <+22>:	movl   $0x13,0x8(%esp)
+   0x08048462 <+30>:	movl   $0x1,0x4(%esp)
+   0x0804846a <+38>:	mov    %eax,(%esp)
+   0x0804846d <+41>:	call   0x8048350 <fwrite@plt>
+   0x08048472 <+46>:	movl   $0x8048584,(%esp)
+   0x08048479 <+53>:	call   0x8048360 <system@plt>
+   0x0804847e <+58>:	leave  
+   0x0804847f <+59>:	ret    
+End of assembler dump.
+```
+
+A quick look at the .rodata section shows us that the string located at `0x8048570` is actually `"/bin/sh"`: in short, if we can call this function, we can execute a shell running as user level2. Running it manually from `gdb` by moving the instruction pointer is useless, since we lose the elevated privileges granted by the setuid bit. Instead, we can exploit the buffer overflow vulnerability in `gets()` to overwrite the return address of `main()` to point to `run()`, effectively hijacking the program's control flow to execute our desired function.
+
+How to do that?
 
 When a function is called, the return address (the address to which the program should return after the function call) is stored on the stack. If we can overflow the buffer and overwrite this return address, we can redirect the program's execution to a location of our choosing; what we typically want is to redirect the return address to point to a system call of a shell-spawning function (like `system("/bin/sh")`).
 

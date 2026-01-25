@@ -85,6 +85,7 @@ In summary, the security settings and binary characteristics indicate that while
 
 Our best allies in this project are mainly `readelf` and `gdb`. Here are some very useful ways to use them:
 - `readelf -a <binary>`: Displays detailed information about the ELF binary, including headers, sections, and segments.
+- `objdump -s -j .rodata <binary>`: Dumps the contents of the .rodata section, which often contains string literals and other read-only data.
 - `gdb -batch <binary> -ex "disas main"`: Disassembles the main function of the binary in a non-interactive way. Replace `main` with any function name to disassemble other functions.
 
 Useful gdb commands in interactive mode:
