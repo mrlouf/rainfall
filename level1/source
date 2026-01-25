@@ -1,0 +1,11 @@
+void run()
+{
+    fwrite();
+    system();
+    return;
+}
+
+int main( void )
+{
+    gets();
+}
