@@ -1,0 +1,22 @@
+int m;
+
+void o()
+{
+    system("/bin/sh");
+    _exit(1);
+}
+
+void n( void )
+{
+    char buf[520];
+    gets(buf);
+    if (m == 0xdeadbeef)
+        o();
+    _exit(0);
+}
+
+int main( void )
+{
+    n();
+    return 0;
+}

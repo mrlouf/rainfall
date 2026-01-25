@@ -1,0 +1,16 @@
+int m = 0;
+
+void    v() {
+    fgets(0, 0, 0);
+    int n = printf("%s\n", 0);
+    if (n != 64)
+        return;
+    fwrite(0, 0, 0, 0);
+    system();
+}
+
+int main( void ) {
+    char buf[536];
+    v();   
+    return 0;
+}
