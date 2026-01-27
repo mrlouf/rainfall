@@ -14,7 +14,7 @@ Dump of assembler code for function main:
 End of assembler dump.
 ```
 
-The `main` function is similar, except that it calls a function `p`. Let's look at that function:
+We can see that the `main` function is similar, except that it calls a function `p`. Let's look at that function:
 
 ```
 level2@RainFall:~$ gdb -batch ./level2 -ex 'disassemble p'
@@ -56,15 +56,6 @@ While the function still calls `gets`, the `system` call is no longer present in
 
 ```
 level2@RainFall:~$ objdump -d level2 | grep '@plt'
- 8048372:	e8 89 00 00 00       	call   8048400 <__gmon_start__@plt>
-08048390 <printf@plt-0x10>:
-080483a0 <printf@plt>:
-080483b0 <fflush@plt>:
-080483c0 <gets@plt>:
-080483d0 <_exit@plt>:
-080483e0 <strdup@plt>:
-080483f0 <puts@plt>:
-08048400 <__gmon_start__@plt>:
 08048410 <__libc_start_main@plt>:
  804843c:	e8 cf ff ff ff       	call   8048410 <__libc_start_main@plt>
  80484e2:	e8 c9 fe ff ff       	call   80483b0 <fflush@plt>
@@ -83,13 +74,15 @@ Before we continue, we need to explain what the Procedure Linkage Table (PLT) an
 
 When a binary is compiled and linked, function calls to shared libraries (like `libc`) are not resolved at compile time. Instead, they are resolved at runtime. The PLT is a section in the binary that contains stubs for these function calls. When a function is called for the first time, the PLT entry for that function will jump to the dynamic linker, which will then resolve the actual address of the function in memory and update the GOT with this address. Subsequent calls to the same function will then use the address stored in the GOT.
 
-In simpler terms, the PLT is like a table of contents that keeps every function call saved under an alias, while the GOT acts as a relay station that points to the actual location of these functions in memory.
+In simpler terms, the PLT is like a table of contents that keeps every function call saved under an alias, while the GOT acts as a cache, or a relay station that points to the actual location of these functions in memory.
 
-If we can overwrite an entry in the GOT, we can redirect function calls to any address we want: if you know about MITM attacks, this is a very similar approach in the sense that we are trying to 'poison' the GOT to redirect function calls, just like a MITM attack poisons the ARP table to redirect network traffic to a different destination.
+If we can overwrite an entry in the GOT, we can redirect function calls to any address we want: if you know about MITM attacks, this is a very similar approach in the sense that we are trying to 'poison' the GOT cache to redirect function calls, just like a MITM attack poisons the ARP table to redirect network traffic to a different destination.
 
 ##  Exploiting the binary
 
-Here the level gives us subtle hints as to out to proceed. The presence of the `gets` function indicates that we can overflow a buffer, but the absence of `system` suggests we need to call the shell ourselves. The check for the high bits of the input address (the `and` and `cmp` instructions) indicates that we cannot return to the stack or the libc, since the ranges `0xb7xxxxxx` and `0xbfxxxxxx` are filtered out. The presence of `strdup` is a clear hint that we should use the heap to store our shellcode, aka the CPU instructions that will spawn our shell.
+Here the level gives us subtle hints as to how to proceed. The presence of the `gets` function indicates that we can overflow a buffer, but the absence of `system` suggests we need to call the shell ourselves. The check for the high bits of the input address (the `and` and `cmp` instructions) indicates that we cannot return to the stack or the libc, since the ranges `0xb7xxxxxx` and `0xbfxxxxxx` are filtered out. The presence of `strdup` is a clear hint that we should use the heap to store our shellcode, aka the CPU instructions that will spawn our shell.
+
+Since the address range for the stack is not filtered 
 
 Consider the following instructions:
 

