@@ -1,6 +1,6 @@
 void p()
 {
-    char buffer[104];
+    char buffer[92];
 
     fflush(stdout);
     gets(buffer);

