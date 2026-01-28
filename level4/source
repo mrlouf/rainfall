@@ -5,16 +5,20 @@ void p(char *s)
     printf(s);
 }
 
-void    n() {
+void n()
+{
     char buf[520];
-    fgets(buf, 520, stdin);
-    if (m != 64)
-        return;
+
+    fgets(buf, 512, stdin);
+
     p(buf);
+
+    if (m != 16930116)
+        return;
+
     system("/bin/cat /home/user/level5/.pass");
 }
 
 int main( void ) {
     n();
-    return 0;
 }
