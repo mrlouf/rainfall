@@ -1,0 +1,4 @@
+##	Description
+
+In this level, we have a program that is quite similar to the previous one. The main calls the `n` function, which then gets user input from `stdin` via `fgets`. The buffer is directly printed using `printf` without any format string specified, leading to a format string vulnerability.
+

@@ -9,10 +9,12 @@ void o()
 void n( void )
 {
     char buf[520];
-    gets(buf);
-    if (m == 0xdeadbeef)
-        o();
-    _exit(0);
+
+    fgets(buf, 512, stdin);
+
+	printf(buf);
+
+    exit(1);
 }
 
 int main( void )
