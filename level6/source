@@ -1,20 +1,23 @@
 void n( void )
 {
-
+	system("/bin/cat /home/user/level7/.pass");
 }
 
 void m( void )  // wrong path
 {
     puts("Nope");
-    return;
 }
 
 int main( void )
 {
-    char    *ptr1;
-    ptr1 = malloc(64);
-    char    *ptr2;
-    ptr2 = malloc(4);
-    n();
+    char    *ptr1 = malloc(64);
+    void (**ptr2)() = malloc(4);
+    
+	ptr2 = &m;
+	
+	strcpy(ptr1, ptr2);
+
+	(*ptr2)();	// indirect way to call m() -> we need to call n() instead
+
     return 0;
 }
