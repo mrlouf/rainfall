@@ -3,20 +3,21 @@ time_t c;
 void m( void )
 {
     time(&c);
-    printf("%s");
+    printf("%ld\n", c);
 }
 
-int main( void )
+int main( int argc, char *argv[] )
 {
     void *p1 = malloc(8);
     void *p2 = malloc(8);
     void *p3 = malloc(8);
     void *p4 = malloc(8);
 
-    strcpy();
-    strcpy();
-    fopen();
+    strcpy(p1, argv[1]);
+    strcpy(p2, argv[2]);
+    fopen(stdin, "r");
     fgets();
     puts();
+
     return 0;
 }
