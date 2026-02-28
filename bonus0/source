@@ -1,0 +1,20 @@
+p()
+{
+    puts();
+    read();
+    strchr();
+    strncpy();
+}
+
+pp() {
+    p();
+    p();
+
+    strcpy();
+    strcat();
+}
+
+int main()
+{
+    pp();
+}

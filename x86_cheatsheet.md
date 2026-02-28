@@ -25,7 +25,7 @@ foo(X, Y, Z);
 
 ### Prologue and Epilogue
 
-Functions in x86 assembly typically start with a prologue that sets up the stack frame and end with an epilogue that cleans up the stack frame before returning, somthing that is not present in x86-64 assembly.
+Functions in x86 assembly typically start with a prologue that sets up the stack frame and end with an epilogue that cleans up the stack frame before returning, something that is not present in x86-64 assembly.
 
 ```assembly
 push    %ebp
@@ -56,6 +56,14 @@ This is a typical epilogue that loads a value into the eax register (the return 
 ```assembly
 mov %ebp, %esp
 pop %ebp
+```
+
+In the calling convention for i386, the stack layout for a main function call looks like this:
+```
+[ebp+12]  → argv (char **)
+[ebp+8]   → argc (int)
+[ebp+4]   → return address
+[ebp]     → saved ebp
 ```
 
 ### CMP and conditional jumps

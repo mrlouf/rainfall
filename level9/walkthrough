@@ -1,0 +1,42 @@
+##  Description
+
+This level introduces a new difficulty: name mangling. If we have a look at the disassembly with `objdump -D level9`, we can see that some of the functions have been renamed with a seemingly random string of characters.
+
+This is commonly done by compilers when compiling C++ code. Name mangling is used to encode additional information about functions, such as their parameters and namespaces, into their names. This allows for function overloading and other features of C++. It also allows two functions or more to have the same name as long as they have different parameters.
+
+Fortunately, `objdump` as well as `gdb` can demangle these names for us to make them more readable:
+
+```bash
+level9@RainFall:~$ objdump -D level9
+...
+080486f6 <_ZN1NC1Ei>:
+ 80486f6:	55                   	push   %ebp
+ 80486f7:	89 e5                	mov    %esp,%ebp
+ 80486f9:	8b 45 08             	mov    0x8(%ebp),%eax
+ 80486fc:	c7 00 48 88 04 08    	movl   $0x8048848,(%eax)
+ 8048702:	8b 45 08             	mov    0x8(%ebp),%eax
+ 8048705:	8b 55 0c             	mov    0xc(%ebp),%edx
+ 8048708:	89 50 68             	mov    %edx,0x68(%eax)
+ 804870b:	5d                   	pop    %ebp
+ 804870c:	c3                   	ret    
+ 804870d:	90                   	nop
+...
+
+level9@RainFall:~$ objdump -CD level9
+...
+080486f6 <N::N(int)>:
+ 80486f6:	55                   	push   %ebp
+ 80486f7:	89 e5                	mov    %esp,%ebp
+ 80486f9:	8b 45 08             	mov    0x8(%ebp),%eax
+ 80486fc:	c7 00 48 88 04 08    	movl   $0x8048848,(%eax)
+ 8048702:	8b 45 08             	mov    0x8(%ebp),%eax
+ 8048705:	8b 55 0c             	mov    0xc(%ebp),%edx
+ 8048708:	89 50 68             	mov    %edx,0x68(%eax)
+ 804870b:	5d                   	pop    %ebp
+ 804870c:	c3                   	ret    
+ 804870d:	90                   	nop
+...
+```
+
+Here for instance, we can see that the function `_ZN1NC1Ei` is actually `N::N(int)`, which is the constructor of a class `N` that takes an integer as a parameter.
+

@@ -1,0 +1,9 @@
+int main(int ac, char **av)
+{
+    if (ac <= 1) {
+        _exit(1);
+    }
+
+    new 
+
+}

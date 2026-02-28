@@ -15,7 +15,7 @@ int main( int argc, char *argv[] )
 
     strcpy(p1, argv[1]);
     strcpy(p2, argv[2]);
-    fopen(stdin, "r");
+    fopen(stdin, "r");  // open stdin for reading
     fgets();
     puts();
 
