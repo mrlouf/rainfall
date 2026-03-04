@@ -1,20 +1,27 @@
-p()
+p(char *dest, char const *dash)
 {
-    puts();
-    read();
-    strchr();
-    strncpy();
+    char buf[4096];
+
+    puts(dash);
+    read(0, buf, 4096);
+    strchr(buf, '\n');  // Not using the return value?
+    strncpy(dest, buf, 20);
+
 }
 
-pp() {
-    p();
-    p();
+pp(char *str) {
 
-    strcpy();
-    strcat();
+    char *str1 = p(str, " - ");
+    char *str2 = p(str, " - ");
+
+    strcpy(str1, str2);
+    strcat(str1, str2);
 }
 
 int main()
 {
-    pp();
+    char str[42];
+
+    pp(str);
+    puts(str);
 }

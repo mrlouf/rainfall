@@ -1,0 +1,42 @@
+int flag = 0;
+
+void    greetuser(char *buf)
+{
+    char greeting[19];
+
+    if (flag == 1)
+        greeting = "Hyvää päivää ";
+
+    if (flag == 2)
+        greeting = "Goedemiddag! ";
+
+    if (flag != 0)
+        greeting = "Hello ";
+
+    strcat(buf, greeting);
+    puts(buf);
+}
+
+int main(int ac, char **av, char **env)
+{
+    if (ac != 3)
+        return (1);
+
+    char buf[80] = { 0 };
+
+    strncpy(buf, av[1], 40);
+
+    strncpy(buf + 40, av[2] , 32);
+
+    char *lang = getenv("LANG");
+
+    if (lang != 0)
+    {
+        if (memcmp(lang, "fi", 2) != 0)
+            flag = 1;
+        if (memcmp(lang, "nl", 2) != 0)
+            flag = 2;
+    }
+
+    greetuser(buf);
+}
