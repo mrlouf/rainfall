@@ -1,19 +1,20 @@
 void p()
 {
-    char buffer[92];
+    char buffer[72];
 
     fflush(stdout);
     gets(buffer);
 
     void *ret = __builtin_return_address(0);
 
-    if ( (ret & 0xb0000000) != 0xb0000000) { // success path
-        puts("Good...");
-        strdup("/bin/sh");
+    if ( (ret & 0xb0000000) == 0xb0000000) {
+        printf("%s\n", buffer);
+        _exit(1);
     }
 
-    printf("%s\n", buffer);
-    _exit(1);
+    puts("Good...");
+    strdup("/bin/sh");
+
 }
 
 int main( void )

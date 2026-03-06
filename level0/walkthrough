@@ -89,7 +89,7 @@ $ whoami
 level1
 ```
 
-Wait, what? Let's understand what happened there: the `level0` binary has the setuid bit set, meaning that when executed, it runs with the privileges of the `level1` user. When we provided the correct argument (423), the program executed `/bin/sh` (a shell) with `level1` privileges using the `execv` function. This effectively gives us a shell as the `level1` user.
+Since the `level0` binary has the setuid bit set, it runs with the privileges of the `level1` user when executed. When we provided the correct argument (423), the program executed `/bin/sh` (a shell) with `level1` privileges using the `execv` function. This effectively gives us a shell as the `level1` user.
 
 Now that we have a shell as `level1`, we can read the `.pass` file located in the home directory of the `level1` user to get the password for the next level:
 
@@ -97,5 +97,3 @@ Now that we have a shell as `level1`, we can read the `.pass` file located in th
 $ cat /home/user/level1/.pass
 1fe8a524fa4bec01ca4ea2a869af2a02260d4a7d5fe7e7c24d8617e6dca12d3a
 ```
-
-There you have it. In spite of all the security mechanisms in place, the real strategy here was very simple: read the disassembly, understand the required input, and give the binary what it wants. All the logs about security features were probably red herrings in this case, but it might not always be so in other levels.

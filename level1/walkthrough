@@ -1,15 +1,6 @@
 ##  Description
 
-Similar to the previous level, let's first have a look at the binary provided in this level.
-
-```bash
-level1@RainFall:~$ ls -l ./level1 
--rwsr-s---+ 1 level2 users 5138 Mar  6  2016 ./level1
-level1@RainFall:~$ file level1 
-level1: setuid setgid ELF 32-bit LSB executable, Intel 80386, version 1 (SYSV), dynamically linked (uses shared libs), for GNU/Linux 2.6.24, BuildID[sha1]=0x099e580e4b9d2f1ea30ee82a22229942b231f2e0, not stripped
-```
-
-Again, the binary is a setuid and setgid executable owned by the next level user (level2) and group (users), which means that when we run this binary, it will execute with the privileges of level2 user and users group.
+Again, the binary for this level is a setuid and setgid executable owned by the next level user (level2), which means that when we run this binary, it will execute with the privileges of level2 user
 
 Let's run the binary and see what it does.
 

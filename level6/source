@@ -8,16 +8,16 @@ void m( void )  // wrong path
     puts("Nope");
 }
 
-int main( void )
+int main( int ac, char **av )
 {
-    char    *ptr1 = malloc(64);
-    void (**ptr2)() = malloc(4);
-    
-	ptr2 = &m;
-	
-	strcpy(ptr1, ptr2);
+    char *buf = malloc(64);
+    void (**ptr)() = malloc(4);
 
-	(*ptr2)();	// indirect way to call m() -> we need to call n() instead
+	ptr = &m;
+	
+	strcpy(buf, av[1]);
+
+	(*ptr)();	// indirect way to call m() -> we need to call n() instead
 
     return 0;
 }
