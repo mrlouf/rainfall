@@ -7,13 +7,13 @@ void p(char *s)
 
 void n()
 {
-    char buf[520];
+    char buf[512];
 
     fgets(buf, 512, stdin);
 
     p(buf);
 
-    if (m != 0x1025544)
+    if (m != 0x1025544) // 16930116 in decimal
         return;
 
     system("/bin/cat /home/user/level5/.pass");

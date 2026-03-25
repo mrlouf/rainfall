@@ -11,7 +11,7 @@ Once we have the source code identified and rewritten, we can see that the progr
 
 After the input is received, the program uses `printf()` to print the contents of the buffer. However, since `printf()` is being used without a format string, meaning it is vulnerable to format string attacks.
 
-What is a format string attack? It is a type of vulnerability that occurs when `printf()` or a similar function is called with an input that in reality contains format specifiers (like `%x`, `%s`, `%n`, etc.). Such input can allow the attacker to either read or write arbitrary memory locations.
+A format string attack is a type of vulnerability that occurs when `printf()` or a similar function is called with an input that contains format specifiers (like `%x`, `%s`, `%n`, etc.). Such input can allow the attacker to either read or write arbitrary memory locations on the stack.
 
 Here, our goal is to overwrite the global variable `m` (located at address `0x804988c`) with the value `64` in order to pass the check and proceed to the shell execution.
 
@@ -26,15 +26,16 @@ whoami
 level4
 ```
 
-Quick summary: the `%n` format specifier writes the number of characters printed so far into the memory address provided as an argument. This is extremely powerful when combined with the ability to control the format string itself.
+The `%n` format specifier writes the number of characters printed so far into the memory address provided as an argument, and the `%4$n` specifier means "write n bytes in the fourth memory location. This allows to effectively write onto the stack.
 
-The solution is to never use `printf()` (or similar functions) without a proper format string. Always specify a format string to avoid such vulnerabilities:
+The counter for that is to never use `printf()` (or similar functions) without a proper format string. Always specify a format string to avoid such vulnerabilities:
 
 ```c
 printf("%s", buffer);	// Correct usage
 printf(buffer);			// Vulnerable usage
 ```
 
-References
+###	References
+
 - [Format String Attacks - OWASP](https://owasp.org/www-community/attacks/Format_string_attack)
 - [Hacking Lab - Format String Vulnerability](https://hackinglab.cz/en/blog/format-string-vulnerability/)

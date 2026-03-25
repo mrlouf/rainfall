@@ -1,23 +1,17 @@
-time_t c;
-
-void m( void )
-{
-    time(&c);
-    printf("%ld\n", c);
-}
+char *str;
 
 int main( int argc, char *argv[] )
 {
-    void *p1 = malloc(8);
-    void *p2 = malloc(8);
-    void *p3 = malloc(8);
-    void *p4 = malloc(8);
+    char *s1 = malloc(8);
+    char *s2 = malloc(8);
+    char *s3 = malloc(8);
+    char *s4 = malloc(8);
 
-    strcpy(p1, argv[1]);
-    strcpy(p2, argv[2]);
-    fopen(stdin, "r");  // open stdin for reading
-    fgets();
-    puts();
+    strcpy(s1, argv[1]);
+    strcpy(s2, argv[2]);
+
+    fgets(str, 68, fopen("/home/user/level8/.pass", "r"));
+    puts("~~");
 
     return 0;
 }

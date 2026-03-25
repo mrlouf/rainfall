@@ -1,25 +1,41 @@
-void *auth;
-void *service;
+char *auth;
+char *service;
 
 int main()
 {
 
-    printf("%p, %p\n", auth, service);
-    if (fgets(auth, 0x80, stdin) == NULL) {
-        return 0;
-    }
+	char buf[5]; // [esp+20h] [ebp-88h] BYREF
+	char v5[2]; // [esp+25h] [ebp-83h] BYREF
+	char v6[129]; // [esp+27h] [ebp-81h] BYREF
 
-    if (strcmp(auth, "auth") == 0) {
-        printf("You requested the %s service\n", service);
-    } else {
-        printf("Invalid password\n");
-    }
+	while (true) {
 
-    return 0;
+		printf("%p, %p\n", auth, service);
+		if (fgets(buf, 0x80, stdin) == NULL) {
+			break;
+		}
+
+		if (memcmp(buf, "auth", 5) == 0) {
+			auth = malloc(4);
+			auth = NULL;
+			if (strlen(s) <= 30) {
+				strcpy(auth, s+5);
+			}
+		}
+		if (memcmp(buf, "service", 8) == 0) {
+			service = strdup(s + 7);
+		}
+		if (memcmp(buf, "reset", 5) == 0) {
+			free(auth);
+		}
+		if (memcmp(buf, "login", 6) == 0) {
+			if ((auth + 8) != NULL) {
+				system("/bin/sh");
+			}
+			else {
+        		fwrite("Password:\n", 1, 16, stdout);
+			}
+		}
+	}
+	return 0;
 }
-
-Contents of section .rodata:
- 8048808 03000000 01000200 25702c20 2570200a  ........%p, %p .
- 8048818 00617574 68200072 65736574 00736572  .auth .reset.ser
- 8048828 76696365 006c6f67 696e002f 62696e2f  vice.login./bin/
- 8048838 73680050 61737377 6f72643a 0a00      sh.Password:.. 

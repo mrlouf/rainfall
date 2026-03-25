@@ -4,6 +4,6 @@ int main(int ac, char **av)
         _exit(1);
     }
 
-    new 
+    unsigned int  = new(108);
 
 }
