@@ -15,7 +15,7 @@ int main( int ac, char **av )
 
 	ptr = &m;
 	
-	strcpy(buf, av[1]);
+	strcpy(buf, av[1]); // vuln -> strcpy does not check buffer size
 
 	(*ptr)();	// indirect way to call m() -> we need to call n() instead
 

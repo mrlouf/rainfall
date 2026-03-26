@@ -10,7 +10,7 @@ int main(int ac, char **av)
 
     char buf[132];
 
-    memset(buf, 0, 0x21 * 4);
+    memset(buf, 0, 132);
 
     fread(buf, 1, 66, stream);
 
