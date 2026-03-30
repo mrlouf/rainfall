@@ -59,7 +59,8 @@ pop %ebp
 ```
 
 In the calling convention for i386, the stack layout for a main function call looks like this:
-```
+
+```assembly
 [ebp+12]  → argv (char **)
 [ebp+8]   → argc (int)
 [ebp+4]   → return address
