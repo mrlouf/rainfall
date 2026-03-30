@@ -34,7 +34,7 @@ and     $0xfffffff0, %esp
 sub     $0x20, %esp
 ```
 
-This is typical boilerplate for a function that reserves 32 bytes (0x20) on the stack for local variables. It can be translated to C to something like:
+This is typical boilerplate for a function that aligns 16 bytes on the stack (0xfffffff0), then reserves 32 bytes (0x20) on the stack for local variables. It can be translated to C to something like:
 
 ```c
 void function() {
