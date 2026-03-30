@@ -3,7 +3,6 @@ char *service;
 
 int main()
 {
-
 	char buf[5]; // [esp+20h] [ebp-88h] BYREF
 	char v5[2]; // [esp+25h] [ebp-83h] BYREF
 	char v6[129]; // [esp+27h] [ebp-81h] BYREF

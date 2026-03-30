@@ -1,5 +1,13 @@
-- level5: finish properly
-- level7: document well
-- level9: finish source, walkthrough
-- bonus0: find final payload working at 42
-- 
+## level7
+
+- Finish the source code
+- Write the detailed walkthrough
+
+## level9
+
+- Finish the source code in C++
+- Write the detailed walkthrough
+
+## bonus0
+
+- Find the correct payload working at 42
