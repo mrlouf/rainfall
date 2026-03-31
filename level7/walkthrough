@@ -1,2 +1,4 @@
 ##	Description
 
+The binary here creates two arrays of two int32_t each, arr1 and arr2. The first element is stored on the stack with the value 1 and 2 respectively, then the second element is allocated with malloc(8), which is enough to store an address/a pointer.
+
