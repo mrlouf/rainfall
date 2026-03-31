@@ -84,11 +84,14 @@ In summary, the security settings and binary characteristics indicate that while
 ##  Useful commands and tools
 
 Our best allies in this project are mainly `readelf` and `gdb`. Here are some very useful ways to use them:
+
 - `readelf -a <binary>`: Displays detailed information about the ELF binary, including headers, sections, and segments.
 - `objdump -s -j .rodata <binary>`: Dumps the contents of the .rodata section, which often contains string literals and other read-only data.
 - `gdb -batch <binary> -ex "disas main"`: Disassembles the main function of the binary in a non-interactive way. Replace `main` with any function name to disassemble other functions.
 
 Useful gdb commands in interactive mode:
+
+- `info proc mappings`: Displays all the mapped address spaces in the program, from the stack to the heap and the libraries (libc) used. Very useful to start dumping memory at runtime.
 - `break <function_name>`: Sets a breakpoint at the beginning of the specified function. Note: 'break' can be abbreviated as 'b'.
 - `b *<address>`: Sets a breakpoint at the specified memory address in hexadecimal. Note: the asterisk (*) indicates that the address is an absolute address.
 - `run` or `r`: Starts the execution of the program until it hits a breakpoint or finishes.
