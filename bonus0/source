@@ -4,17 +4,20 @@ char *p(char *dest, char const *dash)
 
     puts(dash);
     read(0, buf, 4096);
-    *strchr(buf, '\n') = '\0';
+    *strchr(buf, '\n') = '\0'; // '\n' = 0xa
     return strncpy(dest, buf, 20);
 
 }
 
 void pp(char *str) {
 
-    char *str1 = p(str, " - ");
-    char *str2 = p(str, " - ");
+    char s1[20];
+	s1 = p(s1, " - ");
+    char s2[20];
+	s2 = p(s2, " - ");
 
     strcpy(str, str1);
+
     strcat(str, str2);
 }
 
@@ -25,12 +28,6 @@ int main()
     pp(&str);
     puts(&str);
 }
-
-```
-p system
-p exit
-find &system, +99999999, "/bin/sh"
-```
 
 ```
 (gdb) p system
