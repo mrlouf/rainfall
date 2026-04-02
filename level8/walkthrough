@@ -49,3 +49,13 @@ level9
 $ cat /home/user/level9/.pass
 c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
 ```
+
+The solution for this level was quick to find as I was playing around with the program, but it took me a bit longer to actually understand what happens. The thing is that the program does a pseudo verification here:
+
+```c
+			if ((auth + 8) != NULL) {
+				system("/bin/sh");
+			}
+```
+
+This makes no sense, unless the source code was using a structure, which would mean that `auth + 8` was actually something like `data->authenticated`. But as we can see, the check is easily bypassed as soon as we populate the service global.

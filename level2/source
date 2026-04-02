@@ -1,4 +1,4 @@
-void p()
+void p( void )
 {
     char buffer[72];
 
@@ -17,7 +17,7 @@ void p()
 
 }
 
-int main( void )
+void main( void )
 {
     p();
 }

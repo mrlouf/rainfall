@@ -24,25 +24,23 @@ int N::operator-(N *this, N *other)
     return other->value - this->value;
 }
 
-int main(int ac, char **av)
+void main(int ac, char **av)
 {
-    if (ac <= 1) {
+    N *obj1;
+    N *obj2;
+    
+    if (ac < 2) {
         _exit(1);
     }
 
-    N *N1 = N::N(int);
-	N *N2 = N::N(int);
-
-	N::setAnnotation(char*);
-
-	call edx;
-
-    N *obj2 = operator.new(0x6c);
-    N::N(obj2, 6);
+    obj1 = operator.new(0x6c);
+    N::N(obj1,5);
+    obj2 = operator.new(0x6c);
+    N::N(obj2,6);
     
-    N::setAnnotation(obj1, *(char **)(av + 4));
-
-    *(obj2->vtable)(obj1);
-
+    N::setAnnotation(obj1,av[1]);
+    
+    (**obj2->vtable)(obj2,obj1);
+    
     return;
 }
