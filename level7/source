@@ -18,7 +18,9 @@ int main( int argc, char *argv[] )
     strcpy(arr1[1], argv[1]);
     strcpy(arr2[1], argv[2]);
 
-    fgets(str, 68, fopen("/home/user/level8/.pass", "r"));
+    stream = fopen("/home/user/level8/.pass","r");
+
+    fgets(c,0x44,stream);
     puts("~~");
 
     return 0;

