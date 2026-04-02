@@ -1,16 +1,13 @@
 int main(int ac, char **av)
 {
-    FILE *stream = fopen("/home/user/end/.pass", "r");
-
-    if (stream == 0)
-        return (-1);
-
-    if (ac != 2)
-        return (-1);
-
     char buf[132];
 
+    FILE *stream = fopen("/home/user/end/.pass", "r");
+
     memset(buf, 0, 132);
+
+    if (stream == 0 || ac != 2)
+        return (-1);
 
     fread(buf, 1, 66, stream);
 
@@ -21,7 +18,7 @@ int main(int ac, char **av)
     fclose(stream);
 
     if (strcmp(buf, av[1]) != 0)
-        puts();
+        puts(buf);
     else
         execl("/bin/sh", "sh", 0);
 
