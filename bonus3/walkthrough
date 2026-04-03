@@ -16,7 +16,7 @@ But this does not work, the program will try to print the content of the buffer 
 It also does not work if we try to pass a negative number.
 
 The real solution is so obvious that it might be hard to find: we just need to pass an empty string as a parameter.
-This will cause the program to null-terminate the buffer at the first byte, which in turn allows us to pass the strcmp check and triggers the shell.
+This will cause the program to null-terminate the buffer at the first byte, effectively turning it into an empty string equaling the parameter we passed, which in turn allows us to pass the strcmp check and triggers the shell.
 
 ```bash
 bonus3@RainFall:~$ ./bonus3 ""
