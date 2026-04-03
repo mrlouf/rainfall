@@ -9,7 +9,7 @@ void N::setAnnotation(N *this, char *str)
 
 void N::N(N *this, int n)
 {
-    *(undefined ***)this = &PTR_operator+_08048848;
+    this->vtable = &PTR_operator+_08048848;
     this->value = n;
     return;
 }
@@ -40,7 +40,7 @@ void main(int ac, char **av)
     
     N::setAnnotation(obj1,av[1]);
     
-    (**obj2->vtable)(obj2,obj1);
+    (**obj2->vtable)(obj1);
     
     return;
 }
