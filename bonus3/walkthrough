@@ -4,7 +4,7 @@ This level is pretty straightforward. The program reads the content of the file 
 The program then takes the first argument, converts it to an integer and uses it as an index to put a null byte in the buffer.
 Finally, it prints the content of the buffer, if the buffer and the av[1] are a match, the program will execute a shell, otherwise it will print the string after ths null byte that was inserted.
 
-It might look like a buffer overflow at first, or that we need to find the right argument to pass 
+An overflow is not possible here, since the program uses safe functions to read the file and store it in the buffer, so we need to find a way to make the buffer content match the argument we pass.
 
 Since the buffer is 132 bytes long, we can try to bruteforce the right argument with a loop like so:
 
