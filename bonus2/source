@@ -5,13 +5,13 @@ void    greetuser(char *buf)
     char greeting[80];
 
     if (language == 1)
-        greeting = "Hyvää päivää ";
+        strcpy(greeting, "Hyvää päivää ");
 
     else if (language == 2)
-        greeting = "Goedemiddag! ";
+        strcpy(greeting, "Goedemiddag! ");
 
     else if (language == 0)
-        greeting = "Hello ";
+        strcpy(greeting, "Hello ");
 
     strcat(greeting, buf);
     puts(greeting);
@@ -27,7 +27,6 @@ int main(int ac, char **av)
     memset(buf, 0, 76);
 
     strncpy(buf, av[1], 40);
-
     strncpy(buf + 40, av[2], 32);
 
     char *lang = getenv("LANG");
