@@ -92,5 +92,5 @@ $ cat /home/user/bonus0/.pass
 f3f0004b6f364cb5a4147e9ef827fa922a4861408845c26b6971ad770d906728
 ```
 
-The "||sh" is used to bypass the fact that the `system` function will be called with a string containing parasite bytes and fails to execute the first time.
+The "||sh" is used to bypass the fact that the `system` function will be called with a string containing parasite bytes and fails to find and execute the first command.
 The second time, it does find the "sh" and executes it, giving us a shell. We can then read the flag from the `bonus0` user home directory.

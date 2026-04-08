@@ -1,20 +1,20 @@
 void p( void )
 {
-    char buffer[72];
+    char buffer[76];
 
     fflush(stdout);
-    gets(buffer);
+    gets(buffer); // overflow possible
 
     void *ret = __builtin_return_address(0);
 
     if ( (ret & 0xb0000000) == 0xb0000000) {
-        printf("%s\n", buffer);
+        printf("(%p)\n", ret);
         _exit(1);
     }
 
-    puts("Good...");
+    puts(buffer);
     strdup("/bin/sh");
-
+	return;
 }
 
 void main( void )

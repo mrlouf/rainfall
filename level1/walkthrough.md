@@ -1,6 +1,6 @@
 ##  Description
 
-Again, the binary for this level is a setuid and setgid executable owned by the next level user (level2), which means that when we run this binary, it will execute with the privileges of level2 user
+Again, the binary for this level is a setuid and setgid executable owned by the next level user (level2), which means that when we run this binary, it will execute with the privileges of level2 user.
 
 Let's run the binary and see what it does.
 
@@ -113,7 +113,7 @@ So we need to pass a payload to `gets()` that fills the buffer and overwrites th
 
 The winning payload should look like this:
 
-> [64 bytes] + [x bytes] + [Address of `run()`]
+> [64 bytes] + [x padding bytes] + [4 bytes EBP] + [Address of `run()`]
 
 Now we need to determine the exact amount of padding needed to overflow the buffer and overwrite the return address. After a bit of trial and error, we find that the padding is 12 bytes long.
 

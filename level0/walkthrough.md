@@ -1,4 +1,4 @@
-##  Exploitation Strategy
+##  Description
 
 First, we conduct a basic check of the binary:
 
@@ -37,9 +37,9 @@ Dump of assembler code for function main:
    0x08048ecc <+12>:	add    $0x4,%eax
    0x08048ecf <+15>:	mov    (%eax),%eax
    0x08048ed1 <+17>:	mov    %eax,(%esp)
-   0x08048ed4 <+20>:	call   0x8049710 <atoi>
-   0x08048ed9 <+25>:	cmp    $0x1a7,%eax
-   0x08048ede <+30>:	jne    0x8048f58 <main+152>
+   0x08048ed4 <+20>:	call   0x8049710 <atoi>		// convert av[1] to integer
+   0x08048ed9 <+25>:	cmp    $0x1a7,%eax			// compare with 423 in decimal
+   0x08048ede <+30>:	jne    0x8048f58 <main+152> // print "No !" and exit if not equal
    0x08048ee0 <+32>:	movl   $0x80c5348,(%esp)
    0x08048ee7 <+39>:	call   0x8050bf0 <strdup>
    0x08048eec <+44>:	mov    %eax,0x10(%esp)
