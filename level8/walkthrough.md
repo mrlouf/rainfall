@@ -53,9 +53,24 @@ c542e581c5ba5162a85f767996e3247ed619ef6c6f7b76a59435545dc6259f8a
 The solution for this level was quick to find as I was playing around with the program, but it took me a bit longer to actually understand what happens. The thing is that the program does a pseudo verification here:
 
 ```c
-			if ((auth + 8) != NULL) {
-				system("/bin/sh");
-			}
+if ((auth + 32) != NULL) {
+	system("/bin/sh");
+}
 ```
 
-This makes no sense, unless the source code was using a structure, which would mean that `auth + 8` was actually something like `data->authenticated`. But as we can see, the check is easily bypassed as soon as we populate the service global.
+This makes no sense, unless the source code was using a structure, which would mean that `auth + 32` was actually something like `data->authenticated`. But the same could be achieved without a structure, just having the two buffers next to each other in memory.
+
+Calling the service pseudo function in this shell triggers a `strdup()`. Even though we strdup an empty string, malloc still maps some headers before the actual buffer, in this case calling service twice is enough to set the word at *(auth+32) to 0x0000000a, which passes the check and triggers the shell:
+
+```bash
+(gdb) x/32wx 0x0804a008 <  @auth
+0x804a008:      0x61616161      0x0000000a      0x00000000      0x00000011
+0x804a018:      0x0000000a      0x00000000      0x00000000      0x00000011
+0x804a028:      0x0000000a      0x00000000      0x00000000      0x00020fd1
+				^ *(auth + 32) is now populated with a malloc header
+0x804a038:      0x00000000      0x00000000      0x00000000      0x00000000
+0x804a048:      0x00000000      0x00000000      0x00000000      0x00000000
+0x804a058:      0x00000000      0x00000000      0x00000000      0x00000000
+0x804a068:      0x00000000      0x00000000      0x00000000      0x00000000
+0x804a078:      0x00000000      0x00000000      0x00000000      0x00000000
+```

@@ -19,14 +19,14 @@ int main()
 				strcpy(auth, buf+5);
 			}
 		}
-		if (memcmp(buf, "service", 8) == 0) {§
+		if (memcmp(buf, "service", 6 /* one byte short */ ) == 0) {§
 			service = strdup(buf + 7);
 		}
 		if (memcmp(buf, "reset", 5) == 0) {
 			free(auth);
 		}
 		if (memcmp(buf, "login", 6) == 0) {
-			if ((auth + 8) != NULL) {
+			if (*(auth + 32) != NULL) {
 				system("/bin/sh");
 			}
 			else {
