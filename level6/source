@@ -8,16 +8,16 @@ void m( void )  // wrong path
     puts("Nope");
 }
 
-int main( int ac, char **av )
+void main( int ac, char **av )
 {
     char *buf = malloc(64);
-    void (**ptr)() = malloc(4);
+    void (**ptr)(void) = malloc(4);
 
-	ptr = &m;
+	*ptr = m;
 	
 	strcpy(buf, av[1]); // vuln -> strcpy does not check buffer size
 
 	(*ptr)();	// indirect way to call m() -> we need to call n() instead
 
-    return 0;
+    return;
 }
