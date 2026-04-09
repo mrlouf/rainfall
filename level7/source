@@ -1,4 +1,4 @@
-char *str;
+char str[68] = {0};
 
 int m() // 0x080484f4
 {
@@ -7,6 +7,8 @@ int m() // 0x080484f4
 
 int main( int argc, char *argv[] )
 {
+    FILE *stream;
+
     int32_t *arr1 = malloc(8);
     arr1[0] = 1;
     arr1[1] = malloc(8);
@@ -20,7 +22,7 @@ int main( int argc, char *argv[] )
 
     stream = fopen("/home/user/level8/.pass","r");
 
-    fgets(c,0x44,stream);
+    fgets(str, 0x44, stream);
     puts("~~");
 
     return 0;

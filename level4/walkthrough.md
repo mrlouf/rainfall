@@ -1,6 +1,6 @@
 ##	Description
 
-This level is very similar to the previous one, the two differences being that printf is called from within a function, and that the `m` global variable should be equal to `0x01025544` to pass the check. In decimal that's 16909060, which is impossible to write in one go with %n since it would require more than 16 million characters to be printed.
+This level is very similar to the previous one, the two differences being that printf is called from within a function, and that the `m` global variable should be equal to `0x1025544` to pass the check. In decimal that's 16930116, which is impossible to write in one go with %n since it would require more than 16 million characters to be printed.
 
 The workaround is to write the desired value one byte at a time using the `%hhn` specifier, which writes a single byte. The idea is to write the least significant byte first (0x44), then the next one (0x55), and so on. This way we only need to print at most 85 (0x55) characters at a time.
 

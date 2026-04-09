@@ -130,7 +130,7 @@ Breakpoint 1, 0x08048483 in main ()
 $1 = {<text variable, no debug info>} 0x8048444 <run>
 ```
 
-Importantly, the address must be in hexadecimal and little-endian format, as the system architecture is little-endian. Thus, `0x08048444` becomes `\x47\x84\x04\x08`.
+Importantly, the address must be in hexadecimal and little-endian format, as the system architecture is little-endian. Thus, `0x08048444` becomes `\x44\x84\x04\x08`.
 
 We can then create the final payload using Python:
 

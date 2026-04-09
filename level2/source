@@ -5,7 +5,7 @@ void p( void )
     fflush(stdout);
     gets(buffer); // overflow possible
 
-    void *ret = __builtin_return_address(0);
+    uintptr_t *ret = __builtin_return_address(0);
 
     if ( (ret & 0xb0000000) == 0xb0000000) {
         printf("(%p)\n", ret);

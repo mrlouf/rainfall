@@ -63,6 +63,8 @@ public:
 So when we create an instance of `N`, the first 4 bytes will be a pointer to the vtable, followed by the buffer and the integer value.
 The main function creates two instances of `N` and calls the `operator+` function on them. The `operator+` function is the first function in the vtable, so if we can overwrite the buffer of the first object with a pointer to a fake vtable that we control, we can make the program call any function we want when it tries to call `operator+`.
 
+To do so, we can overflow the buffer of the first object with a payload that contains a pointer to a fake vtable, followed by the address of the `system` function in the first entry of the vtable, and the address of the string "||sh" in the second entry of the vtable. This way, when `operator+` is called, it will call `system("||sh")`, which will give us a shell.
+
 If we try the payload below, we can see that the heap is correctly overwritten:
 
 ```bash

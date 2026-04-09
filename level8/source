@@ -14,12 +14,12 @@ int main()
 
 		if (memcmp(buf, "auth", 5) == 0) {
 			auth = malloc(4);
-			auth = NULL;
+			memset(auth, 0, 4);
 			if (strlen(buf) <= 30) {
 				strcpy(auth, buf+5);
 			}
 		}
-		if (memcmp(buf, "service", 6 /* one byte short */ ) == 0) {§
+		if (memcmp(buf, "service", 6 /* one byte short */ ) == 0) {
 			service = strdup(buf + 7);
 		}
 		if (memcmp(buf, "reset", 5) == 0) {

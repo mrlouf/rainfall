@@ -4,7 +4,7 @@ This level requires the user to input two arguments. The first one is run throug
 
 The program then calls `memcpy()` to write n bytes of av[2] into a 36 bytes buffer; it might be tempting to overflow the buffer to overwrite the return address, but that won't work. Instead, we can overwrite the integer nbr to pass the check.
 
-But how can we copy more than 9 bytes into the buffer if nbr cannot be greater than 9? The trick here is very elegant: atoi() returns an int, but memcpy() takes a size_t as a parameter. Knowing this, we can use INT_MIN as av[2] so that it will get us passed the check while still copying enough bytes with memcpy(), like so:
+But how can we copy more than 9 bytes into the buffer if nbr cannot be greater than 9? The trick here is very elegant: atoi() returns an int, but memcpy() takes a size_t as a parameter. Knowing this, we can use INT_MIN as av[1] so that it will get us passed the check while still copying enough bytes with memcpy(), like so:
 
 ```
 ./bonus1 -2147483637 $(python -c "print('A'*40 + '\x46\x4c\x4f\x57')")

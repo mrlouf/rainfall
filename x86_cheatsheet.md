@@ -25,7 +25,7 @@ foo(X, Y, Z);
 
 ### Prologue and Epilogue
 
-Functions in x86 assembly typically start with a prologue that sets up the stack frame and end with an epilogue that cleans up the stack frame before returning, something that is not present in x86-64 assembly.
+Functions in x86 assembly typically start with a prologue that sets up the stack frame and end with an epilogue that cleans up the stack frame before returning, something that might be used less extensively in x86-64 assembly.
 
 ```assembly
 push    %ebp

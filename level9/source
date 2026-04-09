@@ -1,9 +1,20 @@
+class N {
+public:
+    
+    void**  vtable;
+    char    buffer[100];
+    int     value;
+
+    virtual int operator+(N& other);
+    virtual int operator-(N& other);
+};
+
 void N::setAnnotation(N *this, char *str)
 {
   size_t n;
   
   n = strlen(str);
-  memcpy(this + 4, str, n);
+  memcpy(this->buffer, str, n);
   return;
 }
 
