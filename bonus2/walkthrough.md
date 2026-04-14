@@ -1,6 +1,7 @@
 ##  Description
 
 This level is a case of stack overflow. The program reads the environment variable "LANG" and sets a global flag accordingly.
+
 Depending on the value of this flag, the program will save the user greeting in a specific language into a buffer before concatenating it with the main buffer that is filled with the user input. The program then prints the main buffer and exits.
 
 The file uses multiple buffers, the main one where av[1] and av[2] are concatenated and the one where the greeting is stored. The catch is that depending on the language, the greeting string will be longer or shorter, which impacts the strategy with the overflow.
