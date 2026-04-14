@@ -2,7 +2,7 @@ int m;
 
 void    v() {
 
-	char	buf[520];
+	char	buf[512];
 
     fgets(buf, 512, stdin);
 

